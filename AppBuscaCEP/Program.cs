@@ -176,31 +176,38 @@ namespace RequisicoesWeb
         }
 
         //aplica uma requisição na URL
-        static PessoaJuridica BuscarCNPJ(string cnpj)
+         static PessoaJuridica BuscarCNPJ(string cnpj)
         {
-
-            var requisicaoWeb = WebRequest.CreateHttp($"https://publica.cnpj.ws/cnpj/{cnpj}");
-
-            requisicaoWeb.Method = "GET";
-            requisicaoWeb.UserAgent = "RequisicaoWebDemo";
-
-            //guarda os dados da web em variavel
-            using (var resposta = requisicaoWeb.GetResponse())
+            PessoaJuridica pessoaJuridica = new();
+            try
             {
-                var streamDados = resposta.GetResponseStream();
-                StreamReader reader = new StreamReader(streamDados);
-                object objResponse = reader.ReadToEnd();
-                string retornar = objResponse.ToString();
+                var requisicaoWeb = WebRequest.CreateHttp($"https://publica.cnpj.ws/cnpj/{cnpj}");
 
-                streamDados.Close();
-                resposta.Close();
+                requisicaoWeb.Method = "GET";
+                requisicaoWeb.UserAgent = "RequisicaoWebDemo";
+
+                //guarda os dados da web em variavel
+                using (var resposta = requisicaoWeb.GetResponse())
+                {
+                    var streamDados = resposta.GetResponseStream();
+                    StreamReader reader = new StreamReader(streamDados);
+                    object objResponse = reader.ReadToEnd();
+                    string retornar = objResponse.ToString();
+
+                    streamDados.Close();
+                    resposta.Close();
 
 
-                PessoaJuridica pessoaJuridica =
-                JsonConvert.DeserializeObject<PessoaJuridica>(retornar);
-                return pessoaJuridica;
+                    pessoaJuridica =
+                    JsonConvert.DeserializeObject<PessoaJuridica>(retornar);
+                    
+                }
             }
-
+            catch
+            {
+                Console.WriteLine("O CNPJ digitado não pode ser encontrado");
+            }
+            return pessoaJuridica;
         }
     }
 }
