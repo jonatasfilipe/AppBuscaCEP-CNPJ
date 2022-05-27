@@ -60,10 +60,18 @@ namespace RequisicoesWeb
                 if(codigoPostal.Length == 8)
                 {
                     Endereco endereco = BuscarCEP(codigoPostal);
-                    Console.WriteLine($"{" \n Seu endereço é: "}{"\n "}{endereco.logradouro}{"; \n Bairro: "}{endereco.bairro}{"; \n Cidade: "}{endereco.localidade}{"; \n Estado: "}{endereco.uf}{";"}");
+                    if (endereco.bairro == null)
+                    {
+                        Console.WriteLine("O CEP digitado não é válido");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{" \n Seu endereço é: "}{"\n "}{endereco.logradouro}{"; \n Bairro: "}{endereco.bairro}{"; \n Cidade: "}{endereco.localidade}{"; \n Estado: "}{endereco.uf}{";"}");
+                    }
                     Console.WriteLine("--------------------");
                     Console.WriteLine("--------------------");
                     inicio();
+
                 }
                 else
                 {
@@ -106,14 +114,23 @@ namespace RequisicoesWeb
                 if(cnpj.Length == 14)
                 {
                     PessoaJuridica pessoaJuridica = BuscarCNPJ(cnpj);
-                    Console.WriteLine($"{" \n CNPJ raiz: "}{pessoaJuridica.cnpj_raiz}{"; \n Razão social: "}{pessoaJuridica.razao_social}{"; \n Capital Social: "}{pessoaJuridica.capital_social}");
+
+                    if (pessoaJuridica.razao_social == null)
+                    {
+                        Console.WriteLine("O CNPJ não é válido");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{" \n CNPJ raiz: "}{pessoaJuridica.cnpj_raiz}{"; \n Razão social: "}{pessoaJuridica.razao_social}{"; \n Capital Social: "}{pessoaJuridica.capital_social}");
+                    }
                     Console.WriteLine("--------------------");
                     Console.WriteLine("--------------------");
                     inicio();
+
                 }
                 else
                 {
-                    Console.WriteLine("CEP inválido");
+                    Console.WriteLine("CNPJ inválido");
                     Console.WriteLine("1 - Tentar novamente");
                     Console.WriteLine("2 - Voltar ao menu");
                     Console.WriteLine("3 - Sair");
@@ -149,30 +166,38 @@ namespace RequisicoesWeb
         //aplica uma requisição na URL
         static Endereco BuscarCEP(string codigoPostal)
         {
+            Endereco endereco = new();
 
-            var requisicaoWeb = WebRequest.CreateHttp($"https://viacep.com.br/ws/{codigoPostal}/json/");
-
-            requisicaoWeb.Method = "GET";
-            requisicaoWeb.UserAgent = "RequisicaoWebDemo";
-
-            //guarda os dados da web em variavel
-            using (var resposta = requisicaoWeb.GetResponse())
+            try
             {
-                var streamDados = resposta.GetResponseStream();
-                StreamReader reader = new StreamReader(streamDados);
-                object objResponse = reader.ReadToEnd();
-                string retorno = objResponse.ToString();
-;
-                streamDados.Close();
-                resposta.Close();
+                var requisicaoWeb = WebRequest.CreateHttp($"https://viacep.com.br/ws/{codigoPostal}/json/");
+
+                requisicaoWeb.Method = "GET";
+                requisicaoWeb.UserAgent = "RequisicaoWebDemo";
+
+                //guarda os dados da web em variavel
+                using (var resposta = requisicaoWeb.GetResponse())
+                {
+                    var streamDados = resposta.GetResponseStream();
+                    StreamReader reader = new StreamReader(streamDados);
+                    object objResponse = reader.ReadToEnd();
+                    string retorno = objResponse.ToString();
+                    ;
+                    streamDados.Close();
+                    resposta.Close();
 
 
 
-                Endereco endereco =
-                JsonConvert.DeserializeObject<Endereco>(retorno);
-                return endereco;
+                    endereco =
+                    JsonConvert.DeserializeObject<Endereco>(retorno);
+                }
             }
-
+            catch
+            {
+                Console.WriteLine("");
+            }
+            return endereco;
+            
         }
 
         //aplica uma requisição na URL
@@ -205,7 +230,7 @@ namespace RequisicoesWeb
             }
             catch
             {
-                Console.WriteLine("O CNPJ digitado não pode ser encontrado");
+                Console.WriteLine("");
             }
             return pessoaJuridica;
         }
